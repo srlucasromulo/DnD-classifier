@@ -1,25 +1,25 @@
 import re
 from urllib.request import urlopen, Request
+import pandas as pd
 from bs4 import BeautifulSoup
+from monster import Monster
 
 difficulties = {
-    '/images/a/a9/Besti%C3%A1rio_Inofensivo.gif': 0,
-    '/images/8/8f/Besti%C3%A1rio_Trivial.gif': 1,
-    '/images/1/1b/Besti%C3%A1rio_F%C3%A1cil.gif': 2,
-    '/images/6/60/Besti%C3%A1rio_M%C3%A9dio.gif': 3,
-    '/images/1/1e/Besti%C3%A1rio_Dif%C3%ADcil.gif': 4,
-    '/images/a/a1/Besti%C3%A1rio_Desafiador.gif': 5
+    'Harmless': 0,
+    'Trivial': 1,
+    'Easy': 2,
+    'Medium': 3,
+    'Hard': 4,
+    'Challenging': 5
 }
 
 occurrences = {
-    '/images/f/ff/Besti%C3%A1rio_Ocorr%C3%AAncia_Comum.gif': 1,
-    '/images/c/cc/Besti%C3%A1rio_Ocorr%C3%AAncia_Rara.gif': 3,
-    '/images/d/df/Besti%C3%A1rio_Ocorr%C3%AAncia_Incomum.gif': 2,
-    '/images/4/48/Besti%C3%A1rio_Ocorr%C3%AAncia_Muita_Rara.gif': 4
+    'Common': 1,
+    'Uncommon': 3,
+    'Rare': 2,
+    'Very Rare': 4
 }
 
-tibiafandom_base_url = 'https://tibia.fandom.com'
-tibiawiki_base_url = 'https://www.tibiawiki.com.br'
 monsters_types = [
     'https://www.tibiawiki.com.br/wiki/Anf%C3%ADbios',
     'https://www.tibiawiki.com.br/wiki/Aqu%C3%A1ticos',
@@ -43,93 +43,132 @@ monsters_types = [
     'https://www.tibiawiki.com.br/wiki/Vermes'
 ]
 
-wiki_monsters_url = []
-fandom_monsters_url = []
+tibiafandom_base_url = 'https://tibia.fandom.com'
+monsters_url = []
+monsters = []
 
-# get monsters urls
-for monster_type in monsters_types:
-    request = Request(monster_type, headers={'User-Agent': 'Mozilla/5.0'})
-    html = urlopen(request)
-    soup = BeautifulSoup(html, 'html.parser')
-    #
-    table = soup.find_all('div', class_='mw-parser-output')[1].find('table', id='tabelaDPL').find_all('tr')[1:]
 
-    exclude = [tr for row in table
-               for td in row.find_all('td')
-               for tr in td.find_all('tr')]
+def get_monsters_url():
+    for monster_type in monsters_types:
+        request = Request(monster_type, headers={'User-Agent': 'Mozilla/5.0'})
+        html = urlopen(request)
+        soup = BeautifulSoup(html, 'html.parser')
 
-    table_rows = [row for row in table if row not in exclude]
+        table = soup.find_all('div', class_='mw-parser-output')[1].find('table', id='tabelaDPL').find_all('tr')[1:]
 
-    for row in table_rows:
-        monster_href = row.find('a')['href']
+        exclude = [tr for row in table
+                   for td in row.find_all('td')
+                   for tr in td.find_all('tr')]
 
-        wiki_monsters_url.append(tibiawiki_base_url + monster_href)
+        table_rows = [row for row in table if row not in exclude]
 
-        monster_href = monster_href if 'Criatura' not in monster_href \
-            else monster_href.replace('Criatura', 'Creature')
-        monster_href = monster_href if 'Of' not in monster_href \
-            else monster_href.replace('Of', 'of')
-        monster_href = monster_href if 'The' not in monster_href \
-            else monster_href.replace('The', 'the')
-        if 'Horse_(' in monster_href:
-            monster_href = '/wiki/Horse_(Grey)'
-        if 'Devourer_(' in monster_href:
-            monster_href = '/wiki/Devourer'
-        if 'Butterfly_(' in monster_href:
-            monster_href = '/wiki/Butterfly_(Blue)'
+        for row in table_rows:
+            monster_href = row.find('a')['href']
 
-        fandom_monsters_url.append(tibiafandom_base_url + monster_href)
+            monster_href = monster_href if 'Criatura' not in monster_href \
+                else monster_href.replace('Criatura', 'Creature')
+            monster_href = monster_href if 'Of' not in monster_href \
+                else monster_href.replace('Of', 'of')
+            monster_href = monster_href if 'The' not in monster_href \
+                else monster_href.replace('The', 'the')
+            if 'Horse_(' in monster_href:
+                monster_href = '/wiki/Horse_(Grey)'
+            if 'Devourer_(' in monster_href:
+                monster_href = '/wiki/Devourer'
+            if 'Butterfly_(' in monster_href:
+                monster_href = '/wiki/Butterfly_(Blue)'
+            if monster_href == '/wiki/Nomad':
+                monster_href = '/wiki/Nomad_(Basic)'
 
-for i in range(len(wiki_monsters_url)):
-    print(wiki_monsters_url[i], fandom_monsters_url[i])
-    request = Request(wiki_monsters_url[i], headers={'User-Agent': 'Mozilla/5.0'})
-    request = Request(fandom_monsters_url[i], headers={'User-Agent': 'Mozilla/5.0'})
+            monsters_url.append(tibiafandom_base_url + monster_href)
 
-# from tibiawiki br
-# for monster_url in monsters_url:
-#     print(monster_url)
-#     request = Request(monster_url, headers={'User-Agent': 'Mozilla/5.0'})
-#     html = urlopen(request)
-#     soup = BeautifulSoup(html, 'html.parser')
-#     #
-#     # table = soup.find('table', class_='infobox')
-#     #
-#     # data = table.find_all('td')
-#     #
-#     # name = data[2].get_text()
-#     # hp = data[3].get_text().split()[0]
-#     # difficulty = difficulties[data[4].find('img')['src']]
-#     # xp = data[5].get_text().split()[0]
-#     # occurrence = occurrences[data[6].find('img')['src']]
-#     # speed = data[7].get_text().split()[0]
-#     # charm = data[8].get_text().split()[0]
-#     # armor = data[9].get_text().split()[0]
-#     #
-#     # damage_resistane = data[10].find_all('span', class_='tooltip')
-#     # physical_resistance = damage_resistane[0].get_text().strip('%')
-#     # earth_resistance = damage_resistane[1].get_text().strip('%')
-#     # fire_resistance = damage_resistane[2].get_text().strip('%')
-#     # death_resistance = damage_resistane[3].get_text().strip('%')
-#     # energy_resistance = damage_resistane[4].get_text().strip('%')
-#     # holy_resistance = damage_resistane[5].get_text().strip('%')
-#     # ice_resistance = damage_resistane[6].get_text().strip('%')
-#     # healing_resistance = damage_resistane[7].get_text().strip('%')
-#     #
-#     # print(data[29])
-#     # print(data[30])
-#     # print(data[31])
-#     # print(data[32])
-#     # input()
-#
-#     # data[29] = imunidades
-#     # data[30] = pode ser puxado
-#     # data[31] = passa por
-#     # data[32] = empurra
-#
-#     # habilities = table.find('div', class_='column-count column-count-1')
-#
-#     # for i in tds[0:]:
-#     #     print(i)
-#     #     input()
-#
-#     # input()
+
+def get_monsters_info():
+    for monster_url in monsters_url:
+        request = Request(monster_url, headers={'User-Agent': 'Mozilla/5.0'})
+        html = urlopen(request)
+        soup = BeautifulSoup(html, 'html.parser')
+
+        hp = exp = speed = armor = damage = None
+        elements = 1
+        illusionable = pushable = pushes = None
+        difficulty = occurrence = None
+        paralysable = sense_invisibility = None
+        resistances = {}
+
+        monster_info = \
+            soup.find('aside', class_='portable-infobox pi-background pi-border-color pi-theme-twbox pi-layout-default')
+
+        name = monster_info.find('h2', class_='pi-item pi-item-spacing pi-title pi-secondary-background').get_text()
+        print(name)
+
+        properties = monster_info.find_all('section', class_='pi-item pi-group pi-border-color')
+
+        # combat properties
+        divs = properties[0].find_all('div', 'pi-item pi-data pi-item-spacing pi-border-color')
+        for div in divs:
+            prop = div.find('h3', class_='pi-data-label pi-secondary-font').get_text()
+            value = div.find('div', class_='pi-data-value pi-font').get_text()
+            if prop == 'Health':
+                hp = int(value)
+            elif prop == 'Experience':
+                exp = int(value)
+            elif prop == 'Speed':
+                speed = int(value)
+            elif prop == 'Armor':
+                armor = int(value)
+            elif prop == 'Elements':
+                elements = len(value.split())
+            elif prop == 'Est. Max Dmg':
+                damage = get_damage(value)
+
+        # general properties
+        divs = properties[1].find_all('div', 'pi-item pi-data pi-item-spacing pi-border-color')
+        illusionable = 1 if divs[2].find('div', class_='pi-data-value pi-font').get_text() == '✓' else 0
+        pushable = 1 if divs[3].find('div', class_='pi-data-value pi-font').get_text() == '✓' else 0
+        pushes = 1 if divs[4].find('div', class_='pi-data-value pi-font').get_text() == '✓' else 0
+
+        # bestiary properties
+        divs = properties[2].find_all('div', 'pi-item pi-data pi-item-spacing pi-border-color')
+        difficulty = difficulties[divs[1].find('a')['title']]
+        occurrence = occurrences[divs[2].find('a')['title']]
+
+        # immunity properties
+        divs = properties[3].find_all('div', 'pi-item pi-data pi-item-spacing pi-border-color')
+        paralysable = 1 if divs[0].find('div', class_='pi-data-value pi-font').get_text() == '✓' else 0
+        sense_invisibility = 1 if divs[1].find('div', class_='pi-data-value pi-font').get_text() == '✓' else 0
+
+        # resistances
+        element_res = soup.find('div', class_='twbox').find('div', id='creature-resistance-table')
+        element_res = element_res.find('div', id='creature-resistance-d') \
+            .find_all('div', class_='creature-resistance-el')
+        for r in element_res:
+            text = r.get_text().strip('%').split()
+            resistances.update({text[0]: text[1]})
+
+        try:
+            monster = Monster(hp, exp, speed, armor, damage, elements, resistances, illusionable, pushable,
+                              pushes, difficulty, occurrence, paralysable, sense_invisibility)
+            monsters.append(monster)
+        except Exception:
+            pass
+
+
+def save_info():
+    df = pd.DataFrame([monster.__dict__ for monster in monsters],
+                      columns=['difficulty', 'occurrence',
+                               'hp', 'exp', 'speed', 'armor', 'damage', 'elements',
+                               'physical', 'death', 'holy', 'ice', 'fire', 'energy', 'earth',
+                               'illusionable', 'pushable', 'pushes', 'paralysable', 'sense_invis'])
+    df.to_csv('output')
+
+
+def get_damage(text):
+    value = re.findall(r'\d+', text)
+    return int(value[0]) if value else None
+
+
+if __name__ == '__main__':
+    get_monsters_url()
+    get_monsters_info()
+    save_info()
