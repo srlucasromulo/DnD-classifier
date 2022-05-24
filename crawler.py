@@ -100,7 +100,7 @@ def get_monsters_info():
             soup.find('aside', class_='portable-infobox pi-background pi-border-color pi-theme-twbox pi-layout-default')
 
         name = monster_info.find('h2', class_='pi-item pi-item-spacing pi-title pi-secondary-background').get_text()
-        print(name)
+        # print(name)
 
         properties = monster_info.find_all('section', class_='pi-item pi-group pi-border-color')
 
@@ -147,7 +147,7 @@ def get_monsters_info():
             resistances.update({text[0]: text[1]})
 
         try:
-            monster = Monster(hp, exp, speed, armor, damage, elements, resistances, illusionable, pushable,
+            monster = Monster(name, hp, exp, speed, armor, damage, elements, resistances, illusionable, pushable,
                               pushes, difficulty, occurrence, paralysable, sense_invisibility)
             monsters.append(monster)
         except Exception:
@@ -156,7 +156,7 @@ def get_monsters_info():
 
 def save_info():
     df = pd.DataFrame([monster.__dict__ for monster in monsters],
-                      columns=['difficulty', 'occurrence',
+                      columns=['name', 'difficulty', 'occurrence',
                                'hp', 'exp', 'speed', 'armor', 'damage', 'elements',
                                'physical', 'death', 'holy', 'ice', 'fire', 'energy', 'earth',
                                'illusionable', 'pushable', 'pushes', 'paralysable', 'sense_invis'])
