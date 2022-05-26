@@ -95,12 +95,13 @@ def get_monsters_info():
         difficulty = occurrence = None
         paralysable = sense_invisibility = None
         resistances = {}
+        walk_around = walk_through = 0
 
         monster_info = \
             soup.find('aside', class_='portable-infobox pi-background pi-border-color pi-theme-twbox pi-layout-default')
 
         name = monster_info.find('h2', class_='pi-item pi-item-spacing pi-title pi-secondary-background').get_text()
-        # print(name)
+        print(name) # verbose
 
         properties = monster_info.find_all('section', class_='pi-item pi-group pi-border-color')
 
@@ -138,6 +139,16 @@ def get_monsters_info():
         paralysable = 1 if divs[0].find('div', class_='pi-data-value pi-font').get_text() == '✓' else 0
         sense_invisibility = 1 if divs[1].find('div', class_='pi-data-value pi-font').get_text() == '✓' else 0
 
+        # behaviour properties
+        divs = properties[4].find_all('div', 'pi-item pi-data pi-item-spacing pi-border-color')
+        for d in divs:
+            prop = d.find('h3').get_text()
+            value = d.find('div').get_text()
+            if prop == 'Walks Around':
+                walk_around = len(value.split())
+            if prop == 'Walks Through':
+                walk_through = len(value.split())
+
         # resistances
         element_res = soup.find('div', class_='twbox').find('div', id='creature-resistance-table')
         element_res = element_res.find('div', id='creature-resistance-d') \
@@ -148,7 +159,8 @@ def get_monsters_info():
 
         try:
             monster = Monster(name, hp, exp, speed, armor, damage, elements, resistances, illusionable, pushable,
-                              pushes, difficulty, occurrence, paralysable, sense_invisibility)
+                              pushes, difficulty, occurrence, paralysable, sense_invisibility,
+                              walk_around, walk_through)
             monsters.append(monster)
         except Exception:
             pass
@@ -159,7 +171,8 @@ def save_info():
                       columns=['name', 'difficulty', 'occurrence',
                                'hp', 'exp', 'speed', 'armor', 'damage', 'elements',
                                'physical', 'death', 'holy', 'ice', 'fire', 'energy', 'earth',
-                               'illusionable', 'pushable', 'pushes', 'paralysable', 'sense_invis'])
+                               'illusionable', 'pushable', 'pushes', 'paralysable', 'sense_invis',
+                               'walk_around', 'walk_through'])
     df.to_csv('output')
 
 
