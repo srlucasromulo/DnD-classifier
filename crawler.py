@@ -101,7 +101,7 @@ def get_monsters_info():
             soup.find('aside', class_='portable-infobox pi-background pi-border-color pi-theme-twbox pi-layout-default')
 
         name = monster_info.find('h2', class_='pi-item pi-item-spacing pi-title pi-secondary-background').get_text()
-        print(name) # verbose
+        # print(name) # verbose
 
         properties = monster_info.find_all('section', class_='pi-item pi-group pi-border-color')
 
