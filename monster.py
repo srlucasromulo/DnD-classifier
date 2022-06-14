@@ -1,5 +1,5 @@
 class Monster:
-    def __init__(self, name, hp, exp, speed, armor, damage, elements, resistances,
+    def __init__(self, name, hp, exp, speed, armor, damage, summon, convince, elements, resistances,
                  illusionable, pushable, pushes, difficulty, occurrence,
                  paralysable, sense_invis, walk_around, walk_through):
         self.name = str(name)
@@ -10,6 +10,8 @@ class Monster:
         self.speed = int(speed)
         self.armor = int(armor)
         self.damage = int(damage)
+        self.summon = int(summon)
+        self.convince = int(convince)
         self.elements = int(elements)
         self.physical = int(resistances['Physical'])
         self.death = int(resistances['Death'])
@@ -28,7 +30,8 @@ class Monster:
 
     def __str__(self):
         string = f'{self.name},{self.difficulty},{self.occurrence},' \
-                 f'{self.hp},{self.exp},{self.speed},{self.armor},{self.damage},{self.elements},' \
+                 f'{self.hp},{self.exp},{self.speed},{self.armor},{self.damage},' \
+                 f'{self.summon},{self.convince},{self.elements},' \
                  f'{self.physical},{self.death},{self.holy},{self.ice},{self.fire},{self.energy},{self.earth},' \
                  f'{self.illusionable},{self.pushable},{self.pushes},{self.paralysable},{self.sense_invis},' \
                  f'{self.walk_around},{self.walk_through}'
