@@ -139,8 +139,7 @@ def get_monsters_info():
 def save_info():
     df = pd.DataFrame([monster.__dict__ for monster in monsters],
                       columns=['name', 'difficulty', 'occurrence',
-                               'hp', 'exp', 'speed', 'armor', 'damage', 'summon', 'convince',
-                               'elements',
+                               'hp', 'exp', 'speed', 'armor', 'damage', 'summon', 'convince', 'elements',
                                'physical', 'death', 'holy', 'ice', 'fire', 'energy', 'earth',
                                'illusionable', 'pushable', 'pushes', 'paralysable', 'sense_invis',
                                'walk_around', 'walk_through'])
