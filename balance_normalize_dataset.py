@@ -19,7 +19,6 @@ def divide_df_by_diff():
 
 def normalize():
 	global df
-	print(df)
 	df[df.columns[1:]] -= df[df.columns[1:]].min()
 	df[df.columns[1:]] /= (df[df.columns[1:]].max() - df[df.columns[1:]].min())
 
@@ -73,6 +72,8 @@ def balance_normalize():
 
 
 def main():
+	global df
+
 	n = 3
 	method = {
 		1: normalize,
@@ -80,6 +81,8 @@ def main():
 		3: balance_normalize
 	}[n]
 	method()
+
+	df = df.sample(frac=1).reset_index(drop=True)
 
 	if n == 1:
 		df.to_csv('normalized_output')
