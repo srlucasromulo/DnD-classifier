@@ -1,3 +1,5 @@
+import copy
+
 import pandas as pd
 import numpy as np
 import random
@@ -32,34 +34,26 @@ def balance():
 	new_df = pd.DataFrame(columns=df.columns)
 
 	for i in range(diffs):
-
-		value_counts = {}
-		for column in columns:
-			values = np.array(monsters_by_diff[i][column].value_counts().index)
-			counts = np.array(monsters_by_diff[i][column].value_counts().values)
-			counts = counts / sum(counts)
-
-			value_counts[column] = {
-				'values': values,
-				'counts': counts
-			}
+		original_instances = copy.deepcopy(monsters_by_diff[i])
 
 		while len(monsters_by_diff[i]) < target_size:
-			dict = {'difficulty': i}
+			synthetic_instance = {'difficulty': i}
 
-			for column in columns:
-				r1 = np.random.choice(a=value_counts[column]['values'], p=value_counts[column]['counts'])
-				r2 = np.random.choice(a=value_counts[column]['values'], p=value_counts[column]['counts'])
-				if r1 > r2:
-					r1, r2 = r2, r1
+			r1, r2 = random.sample(range(len(original_instances)), 2)
+			instance1 = original_instances.iloc[r1].to_dict()
+			instance2 = original_instances.iloc[r2].to_dict()
 
-				# value = np.random.choice(a=value_counts[column]['values'], p=value_counts[column]['counts'])
-				value = np.random.randint(r1, r2) if r1 != r2 else r1
-				dict[column] = value
+			rnd_point = random.random()
+			for column in df.columns[1:]:
+				values = [instance1[column], instance2[column]]
 
-			dict = pd.DataFrame([dict])
+				value = min(values)
+				value += rnd_point * (max(values) - min(values))
+				synthetic_instance[column] = np.around(value)
+
+			synthetic_instance = pd.DataFrame([synthetic_instance])
 			monsters_by_diff[i] = \
-			pd.concat([monsters_by_diff[i], dict], ignore_index=True)
+			pd.concat([monsters_by_diff[i], synthetic_instance], ignore_index=True)
 
 		new_df = pd.concat([new_df, monsters_by_diff[i]], ignore_index=True)
 
