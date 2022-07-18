@@ -1,1 +1,1 @@
-# DnD-classifier
+# Tibia-classifier
